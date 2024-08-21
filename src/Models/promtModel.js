@@ -30,7 +30,8 @@ class Prompts {
     get(id, username) {
         const prompt = this.prompts.find(prompt => prompt._id === id);
         if (!prompt) throw new Error('Prompt not found');
-        if (prompt.visibility === 'public' || prompt.actor.username === username || prompt.sharedAccess.includes(username)) {
+        const sharedAccessList = Array.isArray(prompt.sharedAccess) ? prompt.sharedAccess : [];   
+        if (prompt.visibility === 'public' || prompt.actor.username === username || sharedAccessList.includes(username)) {
             return prompt;
         } else {
             throw new Error('Access denied');
@@ -38,11 +39,12 @@ class Prompts {
     }
 
     getAll(username) {        
-        return this.prompts.filter(prompt =>
-            prompt.visibility === 'public' ||
-            prompt.actor.username === username ||
-            prompt.sharedAccess.includes(username)
-        );
+        return this.prompts.filter(prompt => {
+            const sharedAccessList = Array.isArray(prompt.sharedAccess) ? prompt.sharedAccess : [];            
+            return prompt.visibility === 'public' ||
+                   prompt.actor.username === username ||
+                   sharedAccessList.includes(username);
+        });
     }
 
     delete(id, username) {
